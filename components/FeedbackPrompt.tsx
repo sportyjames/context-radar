@@ -1,43 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import type { Recipient, Scenario } from "@/lib/types";
+import type { FeedbackRating, RiskLevel } from "@/lib/types";
 
 interface FeedbackPromptProps {
   reportId: string;
-  recipient: Recipient;
-  scenario: Scenario;
+  riskLevel: RiskLevel;
 }
 
-export function FeedbackPrompt({
-  reportId,
-  recipient,
-  scenario,
-}: FeedbackPromptProps) {
-  const [status, setStatus] = useState<"idle" | "submitting" | "done">("idle");
-  const [selection, setSelection] = useState<"helpful" | "not-helpful" | null>(
-    null
-  );
+const THANK_YOU: Record<FeedbackRating, string> = {
+  spot_on: "收到，谢谢你的反馈。",
+  not_enough: "收到，我们会继续校准。",
+  overinterpreted: "收到，这条反馈很有价值。",
+};
 
-  async function submitFeedback(helpful: boolean) {
+export function FeedbackPrompt({ reportId, riskLevel }: FeedbackPromptProps) {
+  const [status, setStatus] = useState<"idle" | "submitting" | "done">("idle");
+  const [selection, setSelection] = useState<FeedbackRating | null>(null);
+
+  async function submitFeedback(rating: FeedbackRating) {
     if (status !== "idle") return;
 
     setStatus("submitting");
-    setSelection(helpful ? "helpful" : "not-helpful");
+    setSelection(rating);
 
     try {
       await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          helpful,
-          reportId,
-          recipient,
-          scenario,
-        }),
+        body: JSON.stringify({ rating, reportId, riskLevel }),
       });
     } catch {
-      // Still acknowledge — feedback is best-effort for MVP
+      // Best-effort for MVP
     } finally {
       setStatus("done");
     }
@@ -45,31 +39,37 @@ export function FeedbackPrompt({
 
   return (
     <div className="border-t border-stone-100 pt-6">
-      {status === "done" ? (
+      {status === "done" && selection ? (
         <p className="text-center text-xs text-stone-500">
-          {selection === "helpful"
-            ? "Glad this resonated — thank you."
-            : "Thanks — we'll keep calibrating."}
+          {THANK_YOU[selection]}
         </p>
       ) : (
-        <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <p className="text-xs text-stone-500">Was this diagnosis helpful?</p>
-          <div className="flex gap-2">
+        <div className="flex flex-col items-center gap-3">
+          <p className="text-xs text-stone-500">这次分析准吗？</p>
+          <div className="flex flex-wrap justify-center gap-2">
             <button
               type="button"
               disabled={status === "submitting"}
-              onClick={() => submitFeedback(true)}
+              onClick={() => submitFeedback("spot_on")}
               className="rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-xs font-medium text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50 disabled:opacity-50"
             >
-              👍 Spot on
+              说得对
             </button>
             <button
               type="button"
               disabled={status === "submitting"}
-              onClick={() => submitFeedback(false)}
+              onClick={() => submitFeedback("not_enough")}
               className="rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-xs font-medium text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50 disabled:opacity-50"
             >
-              👎 Not quite
+              还不够
+            </button>
+            <button
+              type="button"
+              disabled={status === "submitting"}
+              onClick={() => submitFeedback("overinterpreted")}
+              className="rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-xs font-medium text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50 disabled:opacity-50"
+            >
+              过度解读了
             </button>
           </div>
         </div>

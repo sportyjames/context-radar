@@ -13,9 +13,9 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "Context Radar — Workplace Communication Clinic",
+  title: "Context Radar — 看看你的英文消息会被怎么读",
   description:
-    "Understand how you're perceived before you hit send. A safe space for your workplace draft messages.",
+    "中文思维写的英文消息，在西方同事眼里可能是另一个意思。分析职场英文草稿的感知风险。",
 };
 
 export default function RootLayout({

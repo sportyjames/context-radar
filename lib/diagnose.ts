@@ -1,26 +1,14 @@
-import type { RiskLevel } from "./types";
-
-export interface DiagnoseRequest {
-  draft: string;
-  recipient: string;
-  scenario: string;
-}
-
-export interface DiagnoseResponse {
-  risk_level: RiskLevel;
-  perception_warning: string;
-  cultural_decoder: string;
-  rewrites: {
-    collaborative: string;
-    assertive: string;
-    diplomatic: string;
-  };
-}
-
+import type { DiagnoseApiResponse, RiskDirection, RiskLevel } from "./types";
 
 const RISK_LEVELS: RiskLevel[] = ["High", "Medium", "Low"];
+const RISK_DIRECTIONS: RiskDirection[] = [
+  "too_blunt",
+  "too_soft",
+  "wrong_register",
+  "none",
+];
 
-export function parseDiagnoseResponse(raw: string): DiagnoseResponse {
+export function parseDiagnoseResponse(raw: string): DiagnoseApiResponse {
   const cleaned = raw
     .trim()
     .replace(/^```(?:json)?\s*/i, "")
@@ -47,12 +35,26 @@ export function parseDiagnoseResponse(raw: string): DiagnoseResponse {
     throw new Error('Missing or invalid "risk_level".');
   }
 
-  if (typeof data.perception_warning !== "string" || !data.perception_warning.trim()) {
-    throw new Error('Missing or invalid "perception_warning".');
+  if (
+    typeof data.risk_direction !== "string" ||
+    !RISK_DIRECTIONS.includes(data.risk_direction as RiskDirection)
+  ) {
+    throw new Error('Missing or invalid "risk_direction".');
   }
 
-  if (typeof data.cultural_decoder !== "string" || !data.cultural_decoder.trim()) {
-    throw new Error('Missing or invalid "cultural_decoder".');
+  if (typeof data.flagged_phrase !== "string") {
+    throw new Error('Missing or invalid "flagged_phrase".');
+  }
+
+  if (
+    typeof data.perception_range !== "string" ||
+    !data.perception_range.trim()
+  ) {
+    throw new Error('Missing or invalid "perception_range".');
+  }
+
+  if (typeof data.cultural_note !== "string") {
+    throw new Error('Missing or invalid "cultural_note".');
   }
 
   if (!data.rewrites || typeof data.rewrites !== "object") {
@@ -60,7 +62,7 @@ export function parseDiagnoseResponse(raw: string): DiagnoseResponse {
   }
 
   const rewrites = data.rewrites as Record<string, unknown>;
-  const rewriteKeys = ["collaborative", "assertive", "diplomatic"] as const;
+  const rewriteKeys = ["relational", "factual", "on-record"] as const;
 
   for (const key of rewriteKeys) {
     if (typeof rewrites[key] !== "string" || !rewrites[key].trim()) {
@@ -70,17 +72,22 @@ export function parseDiagnoseResponse(raw: string): DiagnoseResponse {
 
   return {
     risk_level: data.risk_level as RiskLevel,
-    perception_warning: data.perception_warning.trim(),
-    cultural_decoder: data.cultural_decoder.trim(),
+    risk_direction: data.risk_direction as RiskDirection,
+    flagged_phrase: data.flagged_phrase.trim(),
+    perception_range: data.perception_range.trim(),
+    cultural_note: data.cultural_note.trim(),
     rewrites: {
-      collaborative: (rewrites.collaborative as string).trim(),
-      assertive: (rewrites.assertive as string).trim(),
-      diplomatic: (rewrites.diplomatic as string).trim(),
+      relational: (rewrites.relational as string).trim(),
+      factual: (rewrites.factual as string).trim(),
+      "on-record": (rewrites["on-record"] as string).trim(),
     },
   };
 }
 
-async function callOpenAI(userPrompt: string, systemPrompt: string): Promise<string> {
+async function callOpenAI(
+  userPrompt: string,
+  systemPrompt: string
+): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     throw new Error("OPENAI_API_KEY is not configured.");
@@ -122,7 +129,10 @@ async function callOpenAI(userPrompt: string, systemPrompt: string): Promise<str
   return content;
 }
 
-async function callAnthropic(userPrompt: string, systemPrompt: string): Promise<string> {
+async function callAnthropic(
+  userPrompt: string,
+  systemPrompt: string
+): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     throw new Error("ANTHROPIC_API_KEY is not configured.");
@@ -139,7 +149,7 @@ async function callAnthropic(userPrompt: string, systemPrompt: string): Promise<
     },
     body: JSON.stringify({
       model,
-      max_tokens: 1024,
+      max_tokens: 2048,
       temperature: 0.4,
       system: systemPrompt,
       messages: [{ role: "user", content: userPrompt }],
@@ -166,7 +176,7 @@ async function callAnthropic(userPrompt: string, systemPrompt: string): Promise<
 export async function callDiagnoseLLM(
   userPrompt: string,
   systemPrompt: string
-): Promise<DiagnoseResponse> {
+): Promise<DiagnoseApiResponse> {
   const openaiKey = process.env.OPENAI_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
@@ -182,3 +192,5 @@ export async function callDiagnoseLLM(
 
   return parseDiagnoseResponse(raw);
 }
+
+export type { DiagnoseApiResponse };
