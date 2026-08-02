@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Context Radar</title>
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body>
+    <header>
+      <span class="brand">Context Radar</span>
+      <span class="meta" id="meta">刚刚</span>
+    </header>
+
+    <div id="view-loading" class="hidden">
+      <div class="state">
+        <div class="spinner"></div>
+        正在分析这封邮件会被怎么读…
+      </div>
+    </div>
+
+    <div id="view-empty" class="hidden">
+      <div class="state">
+        先写点内容，再点<br />「How does this sound?」
+      </div>
+    </div>
+
+    <div id="view-error" class="hidden">
+      <div class="state">
+        <span id="error-message">分析失败了。</span><br /><br />
+        <button id="retry" type="button">重试</button>
+      </div>
+    </div>
+
+    <main id="view-result" class="hidden">
+      <section>
+        <div class="label">对方会怎么读</div>
+        <span class="badge medium" id="risk-badge">—</span>
+      </section>
+
+      <section>
+        <div class="label">你的原文</div>
+        <div class="draft" id="draft"></div>
+      </section>
+
+      <section class="divider">
+        <div class="label" id="range-label">读法范围</div>
+        <div class="body-text" id="perception"></div>
+      </section>
+
+      <section class="divider hidden" id="cultural-section">
+        <div class="label">未写明的规则</div>
+        <div class="body-text" id="cultural"></div>
+      </section>
+
+      <section class="divider">
+        <div class="label">三种改写 · 诉求不变，路径不同</div>
+        <div id="rewrites"></div>
+      </section>
+
+      <section class="divider">
+        <details>
+          <summary>调整分析条件</summary>
+          <div class="field">
+            <div class="field-label">收件人</div>
+            <select id="recipient">
+              <option value="manager">老板 / 经理</option>
+              <option value="peer">同事</option>
+              <option value="cross-functional">跨团队</option>
+              <option value="direct-report">下属</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="field-label">场景</div>
+            <select id="scenario">
+              <option value="update-urgency">催进度 / 要更新</option>
+              <option value="disagreement">表达不同意见</option>
+              <option value="asking-help">求助</option>
+              <option value="small-talk">闲聊</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="field-label">对方的团队文化</div>
+            <select id="culture">
+              <option value="us">美国</option>
+              <option value="uk">英国</option>
+              <option value="europe">欧洲大陆</option>
+              <option value="china">中国</option>
+              <option value="japan-korea">日韩</option>
+              <option value="global-mixed">混合国际团队</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="field-label">你想要的结果</div>
+            <select id="goal">
+              <option value="speed">尽快拿到回复</option>
+              <option value="relationship">保住关系</option>
+              <option value="on-record">留下书面记录</option>
+              <option value="probe">试探对方态度</option>
+            </select>
+          </div>
+          <div class="field">
+            <button id="reanalyze" type="button" style="width: 100%">
+              重新分析
+            </button>
+          </div>
+        </details>
+      </section>
+
+      <section class="divider">
+        <div class="label">这次分析准吗？</div>
+        <div class="feedback">
+          <button type="button" data-fb="right">说得对</button>
+          <button type="button" data-fb="weak">还不够</button>
+          <button type="button" data-fb="over">过度解读了</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      你的邮件内容只在你点击按钮时才会被分析，不会被存储。
+    </footer>
+
+    <script src="panel.js" type="module"></script>
+  </body>
+</html>

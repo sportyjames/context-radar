@@ -59,6 +59,38 @@ Across a realistic mix of drafts, expect roughly 60% Low, 30% Medium,
 10% High. If you find yourself reaching for High, check whether you are
 reacting to directness that is actually appropriate for the relationship.
 
+Check for "identity_risk" BEFORE any other direction. If it applies, it
+takes precedence — a message can be both blunt and identity-risky, and
+the identity issue is the one that matters.
+
+"identity_risk" — the message comments on something tied to the
+recipient's identity rather than their work: accent, English ability,
+name pronunciation, nationality, age, gender, appearance, religion,
+family status.
+
+In Western workplaces these remarks carry consequences beyond
+awkwardness. They can be escalated to HR regardless of intent, and
+intent is not a defense.
+
+This is a common and entirely innocent mistake for these users. In
+Chinese, "我听不懂你的口音" states a communication difficulty. In
+English, naming someone's accent reads as a comment on where they are
+from.
+
+When this fires:
+  - risk_level must be "High"
+  - say plainly that the safest move is to REMOVE the remark entirely,
+    not to soften it
+  - explain the underlying need can be expressed without referencing
+    how the person speaks or who they are. "I could not understand
+    your accent" becomes "I want to make sure I captured everything
+    correctly."
+  - name the specific consequence, not just "may seem impolite".
+    "可能被视为不敏感" is too weak for something that can reach HR.
+
+All three rewrites must drop the identity remark completely while
+preserving the actual request.
+
 ## Risk runs in both directions
 
 Being too soft is a real failure mode, not a safe default. An
@@ -175,12 +207,14 @@ Return ONLY a JSON object. No preamble, no markdown fences.
 
 {
   "risk_level": "High" | "Medium" | "Low",
-  "risk_direction": "too_blunt" | "too_soft" | "wrong_register" | "none",
+  "risk_direction": "too_blunt" | "too_soft" | "wrong_register" | "identity_risk" | "none",
   "flagged_phrase": "The exact substring from the draft that creates the
     risk, copied verbatim. Empty string if risk_level is Low.",
   "perception_range": "Two sentences in Simplified Chinese showing two
     genuinely different outcomes, not the same outcome at two intensities.
     Choose the axis by risk_direction:
+      identity_risk   → what the recipient feels in the moment vs what
+                        happens if they mention it to someone else
       too_blunt       → how a sensitive reader takes it vs how a
                         thick-skinned one does
       too_soft        → the immediate consequence (they reply late) vs
@@ -273,6 +307,26 @@ Goal: Speed.
     "relational": "Following up on the API integration we discussed — any update on your end? Happy to help if anything's blocking.",
     "factual": "Checking in on the API integration status. I need an update by EOD to keep the downstream timeline on track.",
     "on-record": "Following up on the API integration discussed earlier. Please share current status by EOD, or flag any blockers."
+  }
+}
+
+### Example 4 — identity risk
+
+Draft: "Hi, I had trouble following your update in the meeting — I think
+it's your accent. Could you send me the numbers in writing?"
+Recipient: Peer. Scenario: Asking for update. Culture: US tech.
+Goal: Speed.
+
+{
+  "risk_level": "High",
+  "risk_direction": "identity_risk",
+  "flagged_phrase": "it's your accent",
+  "perception_range": "对方当下会感到被针对——这不是在说内容不清楚，而是在说「你说话的方式有问题」。如果他们把这句话告诉经理或 HR，会被当作对同事口音/背景的评论，而不是正常的沟通困难。",
+  "cultural_note": "在中文里，「听不懂你的口音」是在描述沟通障碍；在英文职场里，点出对方的 accent 会被读成对其身份/来源的评论。这类表述即使无意，也可能被升级处理——最安全的做法是把整句删掉，只保留实际需求：「我没完全跟上，能麻烦用文字再发一遍吗？」",
+  "rewrites": {
+    "relational": "Hi — I didn't fully catch the numbers in the meeting. Could you send them over in writing so I can make sure I have everything right?",
+    "factual": "I need the numbers from today's update in writing — I didn't capture them fully during the meeting. Could you send them over?",
+    "on-record": "Following up from today's meeting: I didn't fully capture the numbers during the update. Please send them in writing so I can confirm I have the correct figures."
   }
 }`;
 

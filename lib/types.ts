@@ -22,7 +22,12 @@ export type SenderGoal = "speed" | "relationship" | "on-record" | "probe";
 
 export type RiskLevel = "Low" | "Medium" | "High";
 
-export type RiskDirection = "too_blunt" | "too_soft" | "wrong_register" | "none";
+export type RiskDirection =
+  | "too_blunt"
+  | "too_soft"
+  | "wrong_register"
+  | "identity_risk"
+  | "none";
 
 export type FeedbackRating = "spot_on" | "not_enough" | "overinterpreted";
 

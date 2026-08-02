@@ -22,12 +22,14 @@ const DIRECTION_LABELS: Record<Exclude<RiskDirection, "none">, string> = {
   too_blunt: "太直接",
   too_soft: "太软，容易被忽略",
   wrong_register: "像公文，不像人说话",
+  identity_risk: "涉及对方身份，建议整句删掉",
 };
 
 const DIRECTION_BADGE: Record<Exclude<RiskDirection, "none">, string> = {
   too_blunt: "border-stone-200 bg-white text-stone-600",
   too_soft: "border-stone-200 bg-white text-stone-600",
   wrong_register: "border-stone-200/80 bg-stone-100/80 text-stone-600",
+  identity_risk: "bg-rose-200/60 text-rose-900",
 };
 
 const PERCEPTION_LABELS: Record<RiskDirection, string> = {
@@ -35,6 +37,7 @@ const PERCEPTION_LABELS: Record<RiskDirection, string> = {
   too_blunt: "敏感读者 vs 典型读者",
   too_soft: "即时后果 vs 累积印象",
   wrong_register: "当下察觉 vs 长期印象",
+  identity_risk: "当下感受 vs 告知他人之后",
 };
 
 const CONTAINER_STYLES: Record<RiskLevel, string> = {
@@ -55,10 +58,13 @@ export function RiskSection({
     riskDirection !== "none" ? DIRECTION_LABELS[riskDirection] : null;
   const isAllClear = riskDirection === "none" && riskLevel === "Low";
   const isWrongRegister = riskDirection === "wrong_register";
+  const isIdentityRisk = riskDirection === "identity_risk";
 
   const containerClass = isWrongRegister
     ? REGISTER_CONTAINER
-    : CONTAINER_STYLES[riskLevel];
+    : isIdentityRisk
+      ? CONTAINER_STYLES.High
+      : CONTAINER_STYLES[riskLevel];
 
   return (
     <section className="space-y-3">
@@ -72,6 +78,12 @@ export function RiskSection({
           <span className="rounded-full border border-stone-200/80 bg-stone-100/80 px-2.5 py-1 text-[10px] font-medium text-stone-600">
             语域偏差
           </span>
+        ) : isIdentityRisk ? (
+          <span
+            className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${DIRECTION_BADGE.identity_risk}`}
+          >
+            {DIRECTION_LABELS.identity_risk}
+          </span>
         ) : (
           <span
             className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${RISK_BADGE[riskLevel]}`}
@@ -79,7 +91,7 @@ export function RiskSection({
             {RISK_LABELS[riskLevel]}
           </span>
         )}
-        {directionLabel && riskDirection !== "none" && (
+        {directionLabel && riskDirection !== "none" && !isIdentityRisk && (
           <span
             className={`rounded-full border px-2.5 py-1 text-[10px] font-medium ${DIRECTION_BADGE[riskDirection]}`}
           >

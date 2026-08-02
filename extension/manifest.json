@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Context Radar",
+  "version": "1.0.0",
+  "description": "See how your Gmail draft may land before you send it.",
+  "permissions": ["sidePanel", "storage", "activeTab"],
+  "host_permissions": [
+    "https://mail.google.com/*",
+    "https://context-radar-indol.vercel.app/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["content/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "side_panel": {
+    "default_path": "sidepanel/panel.html"
+  },
+  "action": {
+    "default_title": "Context Radar"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

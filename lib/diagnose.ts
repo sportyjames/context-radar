@@ -5,6 +5,7 @@ const RISK_DIRECTIONS: RiskDirection[] = [
   "too_blunt",
   "too_soft",
   "wrong_register",
+  "identity_risk",
   "none",
 ];
 
